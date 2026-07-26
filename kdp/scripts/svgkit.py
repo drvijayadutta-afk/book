@@ -4,19 +4,83 @@
 SKIN = "#E8B888"
 SKIN2 = "#C68C53"
 INK = "#3a2f2a"
+BLUSH = "#F4A28C"
+
+_UID_COUNTER = [0]
+def _uid():
+    _UID_COUNTER[0] += 1
+    return f"u{_UID_COUNTER[0]}"
 
 def sky_ground(uid, sky_top, sky_bottom, ground_color, ground_y=250, w=700, h=355):
     gid = f"sky_{uid}"
+    ggid = f"grnd_{uid}"
+    vgid = f"vig_{uid}"
     return f"""
     <defs>
       <linearGradient id="{gid}" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stop-color="{sky_top}"/>
         <stop offset="1" stop-color="{sky_bottom}"/>
       </linearGradient>
+      <linearGradient id="{ggid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.30"/>
+        <stop offset="0.18" stop-color="#FFFFFF" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity="0.05"/>
+      </linearGradient>
+      <radialGradient id="{vgid}" cx="0.5" cy="0.42" r="0.75">
+        <stop offset="0.6" stop-color="#000000" stop-opacity="0"/>
+        <stop offset="1" stop-color="#3a2f2a" stop-opacity="0.10"/>
+      </radialGradient>
     </defs>
     <rect x="0" y="0" width="{w}" height="{h}" fill="url(#{gid})"/>
     <rect x="0" y="{ground_y}" width="{w}" height="{h-ground_y}" fill="{ground_color}"/>
+    <rect x="0" y="{ground_y}" width="{w}" height="{h-ground_y}" fill="url(#{ggid})"/>
     """
+
+def vignette(w=700, h=355, uid="v"):
+    vgid = f"vigo_{uid}_{_uid()}"
+    return f"""<defs><radialGradient id="{vgid}" cx="0.5" cy="0.45" r="0.72">
+      <stop offset="0.62" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#2b2010" stop-opacity="0.16"/>
+    </radialGradient></defs>
+    <rect x="0" y="0" width="{w}" height="{h}" fill="url(#{vgid})"/>"""
+
+def soft_shadow(cx, cy, rx, ry=None, opacity=0.30):
+    ry = ry if ry is not None else rx * 0.34
+    gid = f"shadow_{_uid()}"
+    return f"""<defs><radialGradient id="{gid}">
+      <stop offset="0" stop-color="#241a10" stop-opacity="{opacity}"/>
+      <stop offset="0.7" stop-color="#241a10" stop-opacity="{opacity*0.5:.2f}"/>
+      <stop offset="1" stop-color="#241a10" stop-opacity="0"/>
+    </radialGradient></defs>
+    <ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" fill="url(#{gid})"/>"""
+
+def lin_grad(color_top, color_bottom, x1="0", y1="0", x2="0", y2="1"):
+    """Returns (defs_svg, gradient_id) for a 2-stop linear gradient."""
+    gid = f"lg_{_uid()}"
+    defs = f'<linearGradient id="{gid}" x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}"><stop offset="0" stop-color="{color_top}"/><stop offset="1" stop-color="{color_bottom}"/></linearGradient>'
+    return defs, gid
+
+def _shade(hexcolor, factor):
+    hexcolor = hexcolor.lstrip("#")
+    if len(hexcolor) != 6:
+        return hexcolor if hexcolor.startswith == "#" else f"#{hexcolor}"
+    r, g, b = int(hexcolor[0:2], 16), int(hexcolor[2:4], 16), int(hexcolor[4:6], 16)
+    if factor >= 0:
+        r = r + (255 - r) * factor
+        g = g + (255 - g) * factor
+        b = b + (255 - b) * factor
+    else:
+        r = r * (1 + factor)
+        g = g * (1 + factor)
+        b = b * (1 + factor)
+    r, g, b = [max(0, min(255, int(c))) for c in (r, g, b)]
+    return f"#{r:02x}{g:02x}{b:02x}"
+
+def outfit_fill(base_color):
+    """Returns (defs, fill_url) — a soft top-light-to-base vertical gradient."""
+    top = _shade(base_color, 0.35)
+    defs, gid = lin_grad(top, base_color)
+    return f"<defs>{defs}</defs>", f"url(#{gid})"
 
 def sun(cx, cy, r, color="#FFD98A", rays=True):
     out = f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{color}" opacity="0.9"/>'
@@ -50,7 +114,8 @@ def stars(uid, positions, color="#FFF3D6"):
 
 def coin(cx, cy, scale=1.0, uid="c", glow=True):
     s = scale
-    gid = f"coinglow_{uid}_{int(cx)}_{int(cy)}"
+    gid = f"coinglow_{uid}_{_uid()}"
+    bgid = f"coinbev_{uid}_{_uid()}"
     glow_html = ""
     if glow:
         glow_html = f"""
@@ -59,9 +124,16 @@ def coin(cx, cy, scale=1.0, uid="c", glow=True):
         """
     return f"""<g>
       {glow_html}
-      <circle cx="{cx}" cy="{cy}" r="{26*s}" fill="#F7C948" stroke="#C99A2E" stroke-width="{2.5*s}"/>
-      <circle cx="{cx}" cy="{cy}" r="{17*s}" fill="none" stroke="#C99A2E" stroke-width="{1.5*s}"/>
+      <defs><radialGradient id="{bgid}" cx="0.35" cy="0.3" r="0.8">
+        <stop offset="0" stop-color="#FFF3B0"/>
+        <stop offset="0.55" stop-color="#F7C948"/>
+        <stop offset="1" stop-color="#DDA429"/>
+      </radialGradient></defs>
+      <ellipse cx="{cx}" cy="{cy+27*s}" rx="{22*s}" ry="{6*s}" fill="#241a10" opacity="0.12"/>
+      <circle cx="{cx}" cy="{cy}" r="{26*s}" fill="url(#{bgid})" stroke="#C99A2E" stroke-width="{2.5*s}"/>
+      <circle cx="{cx}" cy="{cy}" r="{17*s}" fill="none" stroke="#C99A2E" stroke-width="{1.5*s}" opacity="0.8"/>
       <path d="M {cx} {cy-11*s} a {6*s} {6*s} 0 0 1 0 {12*s}" stroke="#C99A2E" stroke-width="{1.5*s}" fill="none"/>
+      <ellipse cx="{cx-9*s}" cy="{cy-10*s}" rx="{8*s}" ry="{4*s}" fill="#FFFFFF" opacity="0.35" transform="rotate(-28 {cx-9*s} {cy-10*s})"/>
     </g>"""
 
 def milu(cx, cy, scale=1.0, hold_coin=False):
@@ -71,18 +143,28 @@ def milu(cx, cy, scale=1.0, hold_coin=False):
     def y(v): return cy + v * s
     def x(v): return cx + v * s
     coin_bit = coin(x(44), y(-150), 0.5, uid=f"m{int(cx)}{int(cy)}", glow=False) if hold_coin else ""
+    tunic_defs, tunic_fill = outfit_fill("#FF9E80")
+    head_defs, head_fill = outfit_fill(SKIN)
+    shadow = soft_shadow(x(0), y(20), 30 * s, 9 * s, 0.24)
     return f"""<g>
-      <path d="M {x(-24)} {y(-58)} L {x(24)} {y(-58)} L {x(35)} {y(8)} Q {x(0)} {y(20)} {x(-35)} {y(8)} Z" fill="#FF9E80" stroke="{INK}" stroke-width="{1.2*s}" stroke-opacity="0.4"/>
+      {tunic_defs}{head_defs}
+      {shadow}
+      <path d="M {x(-24)} {y(-58)} L {x(24)} {y(-58)} L {x(35)} {y(8)} Q {x(0)} {y(20)} {x(-35)} {y(8)} Z" fill="{tunic_fill}" stroke="{INK}" stroke-width="{1.2*s}" stroke-opacity="0.4"/>
       <ellipse cx="{x(-15)}" cy="{y(14)}" rx="{13*s}" ry="{8*s}" fill="#3a2f2a"/>
       <ellipse cx="{x(15)}" cy="{y(14)}" rx="{13*s}" ry="{8*s}" fill="#3a2f2a"/>
-      <circle cx="{x(0)}" cy="{y(-92)}" r="{32*s}" fill="{SKIN}"/>
+      <circle cx="{x(0)}" cy="{y(-92)}" r="{32*s}" fill="{head_fill}"/>
       <circle cx="{x(-30)}" cy="{y(-118)}" r="{12*s}" fill="#2b2320"/>
       <circle cx="{x(30)}" cy="{y(-118)}" r="{12*s}" fill="#2b2320"/>
-      <path d="M {x(-30)} {y(-128)} l {-6*s} {-8*s}" stroke="#F2C94C" stroke-width="{3*s}"/>
-      <path d="M {x(30)} {y(-128)} l {6*s} {-8*s}" stroke="#F2C94C" stroke-width="{3*s}"/>
+      <path d="M {x(-30)} {y(-128)} l {-6*s} {-8*s}" stroke="#F2C94C" stroke-width="{3*s}" stroke-linecap="round"/>
+      <path d="M {x(30)} {y(-128)} l {6*s} {-8*s}" stroke="#F2C94C" stroke-width="{3*s}" stroke-linecap="round"/>
+      <ellipse cx="{x(-19)}" cy="{y(-84)}" rx="{6.5*s}" ry="{4.2*s}" fill="{BLUSH}" opacity="0.55"/>
+      <ellipse cx="{x(19)}" cy="{y(-84)}" rx="{6.5*s}" ry="{4.2*s}" fill="{BLUSH}" opacity="0.55"/>
       <circle cx="{x(-12)}" cy="{y(-92)}" r="{3.4*s}" fill="{INK}"/>
       <circle cx="{x(12)}" cy="{y(-92)}" r="{3.4*s}" fill="{INK}"/>
+      <circle cx="{x(-13.2)}" cy="{y(-93.2)}" r="{1*s}" fill="#FFFFFF" opacity="0.85"/>
+      <circle cx="{x(10.8)}" cy="{y(-93.2)}" r="{1*s}" fill="#FFFFFF" opacity="0.85"/>
       <path d="M {x(-9)} {y(-80)} q {9*s} {8*s} {18*s} 0" stroke="{INK}" stroke-width="{2*s}" fill="none" stroke-linecap="round"/>
+      <ellipse cx="{x(-10)}" cy="{y(-118)}" rx="{9*s}" ry="{5*s}" fill="#FFFFFF" opacity="0.16"/>
       {coin_bit}
     </g>"""
 
@@ -90,16 +172,25 @@ def pico(cx, cy, scale=1.0):
     s = scale
     def y(v): return cy + v * s
     def x(v): return cx + v * s
+    body_defs, body_fill = outfit_fill("#8ECDF0")
+    shadow = soft_shadow(x(0), y(30), 26 * s, 8 * s, 0.22)
     return f"""<g>
-      <ellipse cx="{x(0)}" cy="{y(-10)}" rx="{30*s}" ry="{26*s}" fill="#8ECDF0"/>
-      <path d="M {x(-30)} {y(-14)} q {-14*s} {-4*s} -{20*s} {6*s} q {12*s} {6*s} {20*s} -{2*s}" fill="#5FB0DE"/>
-      <path d="M {x(30)} {y(-14)} q {14*s} {-4*s} {20*s} {6*s} q {-12*s} {6*s} -{20*s} -{2*s}" fill="#5FB0DE"/>
-      <circle cx="{x(-11)}" cy="{y(-16)}" r="{3.6*s}" fill="{INK}"/>
-      <circle cx="{x(11)}" cy="{y(-16)}" r="{3.6*s}" fill="{INK}"/>
-      <path d="M {x(-6)} {y(-4)} q {6*s} {5*s} {12*s} 0" stroke="{INK}" stroke-width="{1.6*s}" fill="none" stroke-linecap="round"/>
-      <path d="M {x(-18)} {y(10)} q {18*s} {14*s} {36*s} 0" fill="#FF9E80"/>
+      {body_defs}
+      {shadow}
       <ellipse cx="{x(-14)}" cy="{y(22)}" rx="{5*s}" ry="{7*s}" fill="#F2C94C"/>
       <ellipse cx="{x(14)}" cy="{y(22)}" rx="{5*s}" ry="{7*s}" fill="#F2C94C"/>
+      <path d="M {x(-30)} {y(-14)} q {-14*s} {-4*s} -{20*s} {6*s} q {12*s} {6*s} {20*s} -{2*s}" fill="#5FB0DE"/>
+      <path d="M {x(30)} {y(-14)} q {14*s} {-4*s} {20*s} {6*s} q {-12*s} {6*s} -{20*s} -{2*s}" fill="#5FB0DE"/>
+      <ellipse cx="{x(0)}" cy="{y(-10)}" rx="{30*s}" ry="{26*s}" fill="{body_fill}"/>
+      <ellipse cx="{x(-11)}" cy="{y(-22)}" rx="{10*s}" ry="{5*s}" fill="#FFFFFF" opacity="0.2"/>
+      <ellipse cx="{x(-15)}" cy="{y(-2)}" rx="{6*s}" ry="{4*s}" fill="{BLUSH}" opacity="0.5"/>
+      <ellipse cx="{x(15)}" cy="{y(-2)}" rx="{6*s}" ry="{4*s}" fill="{BLUSH}" opacity="0.5"/>
+      <circle cx="{x(-11)}" cy="{y(-16)}" r="{3.6*s}" fill="{INK}"/>
+      <circle cx="{x(11)}" cy="{y(-16)}" r="{3.6*s}" fill="{INK}"/>
+      <circle cx="{x(-12)}" cy="{y(-17.2)}" r="{1*s}" fill="#FFFFFF" opacity="0.85"/>
+      <circle cx="{x(9.8)}" cy="{y(-17.2)}" r="{1*s}" fill="#FFFFFF" opacity="0.85"/>
+      <path d="M {x(-6)} {y(-4)} q {6*s} {5*s} {12*s} 0" stroke="{INK}" stroke-width="{1.6*s}" fill="none" stroke-linecap="round"/>
+      <path d="M {x(-18)} {y(10)} q {18*s} {14*s} {36*s} 0" fill="#FF9E80"/>
     </g>"""
 
 # accessory drawers keyed by name; each returns svg using head center (hx,hy) and scale s
@@ -138,13 +229,22 @@ def adult(cx, cy, scale=1.0, outfit="#8ECDF0", skin=SKIN2, accessory=None, acc_c
         acc_svg = _acc_hardhat(hx, hy, s)
     glasses_svg = _acc_glasses(hx, hy, s) if accessory == "glasses" else ""
     stetho_svg = _acc_stethoscope(x(0), y(-30), s) if prop == "stethoscope" else ""
+    outfit_defs, outfit_url = outfit_fill(outfit)
+    skin_defs, skin_url = outfit_fill(skin)
+    shadow = soft_shadow(x(0), y(26), 34 * s, 10 * s, 0.26)
     return f"""<g>
-      <path d="M {x(-28)} {y(-92)} L {x(28)} {y(-92)} L {x(42)} {y(10)} Q {x(0)} {y(24)} {x(-42)} {y(10)} Z" fill="{outfit}" stroke="{INK}" stroke-width="{1.4*s}" stroke-opacity="0.5"/>
+      {outfit_defs}{skin_defs}
+      {shadow}
+      <path d="M {x(-28)} {y(-92)} L {x(28)} {y(-92)} L {x(42)} {y(10)} Q {x(0)} {y(24)} {x(-42)} {y(10)} Z" fill="{outfit_url}" stroke="{INK}" stroke-width="{1.4*s}" stroke-opacity="0.5"/>
       <ellipse cx="{x(-18)}" cy="{y(16)}" rx="{16*s}" ry="{9*s}" fill="{INK}"/>
       <ellipse cx="{x(18)}" cy="{y(16)}" rx="{16*s}" ry="{9*s}" fill="{INK}"/>
-      <circle cx="{hx}" cy="{hy}" r="{30*s}" fill="{skin}"/>
+      <circle cx="{hx}" cy="{hy}" r="{30*s}" fill="{skin_url}"/>
+      <ellipse cx="{hx-9*s}" cy="{hy+9*s}" rx="{6*s}" ry="{4*s}" fill="{BLUSH}" opacity="0.45"/>
+      <ellipse cx="{hx+9*s}" cy="{hy+9*s}" rx="{6*s}" ry="{4*s}" fill="{BLUSH}" opacity="0.45"/>
       <circle cx="{hx-11*s}" cy="{hy+2*s}" r="{3.2*s}" fill="{INK}"/>
       <circle cx="{hx+11*s}" cy="{hy+2*s}" r="{3.2*s}" fill="{INK}"/>
+      <circle cx="{hx-12.2*s}" cy="{hy+0.8*s}" r="{0.9*s}" fill="#FFFFFF" opacity="0.85"/>
+      <circle cx="{hx+9.8*s}" cy="{hy+0.8*s}" r="{0.9*s}" fill="#FFFFFF" opacity="0.85"/>
       <path d="M {hx-8*s} {hy+12*s} q {8*s} {7*s} {16*s} 0" stroke="{INK}" stroke-width="{2*s}" fill="none" stroke-linecap="round"/>
       {acc_svg}
       {glasses_svg}
@@ -171,6 +271,7 @@ def bird(cx, cy, scale=1.0, color="#8a7a6a"):
 def cow(cx, cy, scale=1.0):
     s = scale
     return f"""<g>
+      {soft_shadow(cx, cy+34*s, 50*s, 12*s, 0.20)}
       <ellipse cx="{cx}" cy="{cy}" rx="{46*s}" ry="{28*s}" fill="#FFFDF8" stroke="{INK}" stroke-width="2"/>
       <ellipse cx="{cx-24*s}" cy="{cy-8*s}" rx="{10*s}" ry="{8*s}" fill="#3a2f2a" opacity="0.85"/>
       <ellipse cx="{cx+14*s}" cy="{cy+8*s}" rx="{12*s}" ry="{9*s}" fill="#3a2f2a" opacity="0.85"/>
@@ -185,8 +286,11 @@ def bus(cx, cy, scale=1.0):
     s = scale
     w, h = 220 * s, 100 * s
     x0, y0 = cx - w / 2, cy - h
+    outfit_defs, outfit_url = outfit_fill("#5FA8D3")
     return f"""<g>
-      <rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="{14*s}" fill="#5FA8D3" stroke="{INK}" stroke-width="2.5"/>
+      {outfit_defs}
+      {soft_shadow(cx, y0+h+8*s, w*0.56, 10*s, 0.22)}
+      <rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="{14*s}" fill="{outfit_url}" stroke="{INK}" stroke-width="2.5"/>
       <rect x="{x0+10*s}" y="{y0+12*s}" width="{w-20*s}" height="{34*s}" rx="{6*s}" fill="#D9F0FA"/>
       {"".join(f'<line x1="{x0+10*s+i*(w-20*s)/5}" y1="{y0+12*s}" x2="{x0+10*s+i*(w-20*s)/5}" y2="{y0+46*s}" stroke="#5FA8D3" stroke-width="2"/>' for i in range(1,5))}
       <rect x="{x0+10*s}" y="{y0+56*s}" width="{w-20*s}" height="{10*s}" fill="#F2A22B"/>

@@ -48,7 +48,7 @@ STORY_TEXT = [
 
 def sc(uid, sky, ground, ground_y, extra):
     bg = K.sky_ground(uid, sky[0], sky[1], ground, ground_y)
-    return bg + extra
+    return bg + extra + K.vignette(700, 355, uid)
 
 def scene_00(u):
     e = K.sun(600, 60, 34, "#FFD98A")
@@ -353,12 +353,14 @@ hero += K.sun(620, 70, 36)
 hero += K.coin(350, 100, 2.1, uid="hero")
 hero += K.milu(250, 350, 1.15)
 hero += K.pico(480, 335, 0.85)
+hero += K.vignette(700, 420, "hero")
 title_hero = f'<div class="hero-frame">{K.scene_svg("hero", hero, 700, 420)}</div>'
 section("title first-section", "", "", f"""
   <div class="title-wrap">
     {title_hero}
     <div class="title-series">{SERIES}</div>
     <h1 class="title-main">{TITLE}</h1>
+    <div class="title-rule"></div>
     <div class="title-byline">Written by {AUTHOR}</div>
     <div class="title-byline">Illustrated by <span class="todo">[Illustrator name — to be added]</span></div>
   </div>
@@ -391,10 +393,14 @@ section("dedication", "", "", f"""
 """)
 
 # 4-27: STORY PAGES
+divider_svg = K.scene_svg("div", K.coin(30, 30, 0.55, uid="div", glow=False), 60, 60)
 for i, text in enumerate(STORY_TEXT):
+    lead, _, rest = text.partition(" ")
+    styled_text = f'<span class="lead-word">{lead}</span> {rest}'
     section("story", f"PAGE {i+3}", "", f"""
       {illo_scene(i)}
-      <p class="story-text">{text}</p>
+      <div class="divider"><span class="divider-line"></span><span class="divider-coin">{divider_svg}</span><span class="divider-line"></span></div>
+      <div class="text-card"><p class="story-text">{styled_text}</p></div>
     """)
 
 # 28: HELPING CHART — visual infographic
@@ -469,52 +475,103 @@ section("activity", "PAGE 32", "Match the Helper to What They Made", f"""
 """)
 
 css = """
-@page { size: 8.5in 8.5in; margin: 0.6in 0.6in 0.65in 0.6in; }
+@page { size: 8.5in 8.5in; margin: 0; }
 * { box-sizing: border-box; }
-body { font-family: 'Liberation Sans', 'DejaVu Sans', sans-serif; color: #2a2320; font-size: 12pt; line-height: 1.5; }
-.section { page-break-before: always; }
+html { background: #FBF3E3; }
+body {
+  font-family: 'Liberation Sans', 'DejaVu Sans', sans-serif;
+  color: #2a2320; font-size: 12pt; line-height: 1.5;
+  background: #FBF3E3;
+  padding: 0.55in 0.6in 0.6in 0.6in;
+}
+.section { page-break-before: always; position: relative; }
 .section.first-section { page-break-before: avoid; }
-.kicker { position: absolute; top: 0.3in; right: 0.6in; font-size: 8pt; letter-spacing: 1px; color: #b8a98f; }
-h1 { font-size: 15pt; color: #A8481A; margin: 0 0 0.15in 0; }
+.kicker {
+  position: absolute; top: 0.28in; right: 0.6in;
+  font-size: 7.5pt; letter-spacing: 1.2px; color: #B8894A;
+  background: #FFFDF8; border: 1pt solid #E8D8B8; border-radius: 10pt;
+  padding: 2pt 9pt;
+}
+h1 {
+  font-family: 'DejaVu Serif', serif; font-weight: bold;
+  font-size: 16pt; color: #A8481A; margin: 0 0 0.2in 0;
+  padding-bottom: 0.09in; border-bottom: 2pt solid #EAD9B4;
+}
 
 .title-wrap { text-align: center; }
-.hero-frame { margin: -0.1in -0.6in 0.15in -0.6in; border-radius: 0 0 22px 22px; overflow: hidden; }
+.hero-frame {
+  margin: -0.55in -0.6in 0.2in -0.6in;
+  border-radius: 0 0 32px 32px; overflow: hidden;
+  box-shadow: 0 6pt 16pt rgba(58,47,42,0.22);
+}
 .hero-frame svg { display: block; width: 100%; height: auto; }
-.title-series { font-size: 11pt; color: #8C6BB5; margin: 0.1in 0 0.06in 0; }
-.title-main { font-size: 26pt; color: #C2410C; margin: 0 0 0.25in 0; }
+.title-series {
+  font-size: 10.5pt; letter-spacing: 2px; text-transform: uppercase;
+  color: #8C6BB5; margin: 0.1in 0 0.08in 0; font-weight: bold;
+}
+.title-main {
+  font-family: 'DejaVu Serif', serif; font-weight: bold;
+  font-size: 30pt; color: #C2410C; margin: 0 0 0.05in 0;
+  border-bottom: none; padding-bottom: 0;
+}
+.title-rule { width: 1.6in; height: 2pt; background: #EAD9B4; margin: 0 auto 0.3in auto; }
 .title-byline { font-size: 11pt; color: #4a3d33; margin: 0.06in 0; }
 
 .copyright-wrap, .dedication-wrap { font-size: 10pt; color: #4a3d33; }
-.copyright-wrap { padding-top: 0.9in; }
+.copyright-wrap { padding-top: 0.7in; }
 .copyright-wrap p { margin: 0.14in 0; }
-.dedication-wrap { text-align: center; padding-top: 0.3in; }
-.dedication-art { margin-bottom: 0.35in; border-radius: 16px; overflow: hidden; }
+.dedication-wrap { text-align: center; padding-top: 0.2in; }
+.dedication-art { margin-bottom: 0.35in; border-radius: 18px; overflow: hidden; box-shadow: 0 4pt 12pt rgba(58,47,42,0.14); }
 .dedication-art svg { display: block; width: 100%; height: auto; }
-.dedication-wrap p { font-style: italic; font-size: 13pt; }
+.dedication-wrap p {
+  font-family: 'DejaVu Serif', serif; font-style: italic;
+  font-size: 14pt; color: #5a3d24; line-height: 1.6;
+}
 .todo { color: #b23b3b; font-style: italic; }
 
-.illo-frame { border-radius: 16px; overflow: hidden; margin-bottom: 0.22in; box-shadow: 0 0 0 1px #eee1c9; }
+.illo-frame {
+  border-radius: 20px; overflow: hidden;
+  box-shadow: 0 0 0 6pt #FFFDF8, 0 0 0 7pt #EAD9B4, 0 8pt 18pt rgba(58,47,42,0.20);
+  margin: 0.06in 0.06in 0.26in 0.06in;
+}
 .illo-frame svg { display: block; width: 100%; height: auto; }
-.story-text { font-size: 14.5pt; line-height: 1.5; color: #3a2f2a; }
+
+.divider { display: flex; align-items: center; justify-content: center; margin: -0.1in 0 0.1in 0; }
+.divider-line { flex: 1; max-width: 1.1in; height: 1pt; background: #DEC9A0; }
+.divider-coin { width: 30px; height: 30px; margin: 0 0.12in; flex-shrink: 0; }
+.divider-coin svg { display: block; width: 100%; height: 100%; }
+
+.text-card {
+  background: #FFFDF8; border-radius: 14px; padding: 0.14in 0.28in;
+  box-shadow: 0 2pt 8pt rgba(58,47,42,0.07);
+}
+.story-text {
+  font-family: 'DejaVu Serif', serif;
+  font-size: 14pt; line-height: 1.55; color: #3a2f2a; margin: 0;
+}
+.story-text .lead-word { color: #A8481A; font-weight: bold; }
 
 .activity-intro { font-size: 11pt; color: #4a3d33; margin-bottom: 0.15in; }
-.small-art { border-radius: 14px; overflow: hidden; margin-bottom: 0.15in; }
+.small-art { border-radius: 14px; overflow: hidden; margin-bottom: 0.15in; box-shadow: 0 3pt 10pt rgba(58,47,42,0.12); }
 .small-art svg { display: block; width: 100%; height: auto; }
 
-table { width: 100%; border-collapse: collapse; margin: 0.12in 0; font-size: 10.5pt; }
-th { background: #F3E6CE; text-align: left; padding: 0.07in 0.1in; border: 1pt solid #e8d8b8; }
-td { padding: 0.08in 0.1in; border: 1pt solid #eee1c9; vertical-align: middle; }
+table { width: 100%; border-collapse: collapse; margin: 0.12in 0; font-size: 10.5pt; box-shadow: 0 2pt 8pt rgba(58,47,42,0.06); }
+th { background: #F3E6CE; text-align: left; padding: 0.08in 0.1in; border: 1pt solid #e8d8b8; font-family: 'DejaVu Serif', serif; }
+td { padding: 0.09in 0.1in; border: 1pt solid #eee1c9; vertical-align: middle; background: #FFFDF8; }
 .dots { text-align: center; color: #cbb89a; }
 .row-icon svg { width: 26px; height: 26px; vertical-align: middle; }
 
-.card-box { border: 2px solid #E07856; border-radius: 12px; padding: 0.16in 0.25in; margin-bottom: 0.15in; font-size: 12pt; }
+.card-box { border: 2px solid #E07856; border-radius: 14px; padding: 0.16in 0.25in; margin-bottom: 0.15in; font-size: 12pt; background: #FFFDF8; box-shadow: 0 2pt 8pt rgba(58,47,42,0.07); }
 .card-box p { margin: 0.12in 0; border-bottom: 1pt dotted #cbb89a; }
-.draw-box { border: 2px dashed #cdbfa8; border-radius: 14px; height: 1.9in; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 0.12in; }
+.draw-box { border: 2px dashed #cdbfa8; border-radius: 14px; height: 1.9in; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 0.12in; background: #FFFDF8; }
 .draw-label { color: #b3a58c; font-size: 9pt; }
-.coloring-frame, .maze-frame { display: flex; justify-content: center; align-items: center; margin-top: 0.15in; }
+.coloring-frame, .maze-frame {
+  display: flex; justify-content: center; align-items: center; margin-top: 0.15in;
+  background: #FFFDF8; border-radius: 18px; padding: 0.2in; box-shadow: 0 2pt 8pt rgba(58,47,42,0.06);
+}
 
 .chart-grid { display: flex; flex-wrap: wrap; gap: 0.14in; justify-content: space-between; }
-.chart-card { width: 47%; border: 2px solid #E8D8B8; border-radius: 12px; padding: 0.12in; display: flex; align-items: center; gap: 0.1in; background: #FFFDF8; }
+.chart-card { width: 47%; border: 2px solid #E8D8B8; border-radius: 14px; padding: 0.12in; display: flex; align-items: center; gap: 0.1in; background: #FFFDF8; box-shadow: 0 2pt 6pt rgba(58,47,42,0.06); }
 .chart-icons { display: flex; align-items: center; gap: 0.04in; }
 .chart-icons .mini svg { width: 34px; height: 34px; display: block; }
 .chart-icons .plus { color: #cbb89a; font-size: 10pt; }

@@ -1,11 +1,13 @@
 # KDP Interior — Illustrated Beta
 
-`My-First-Money-Adventure-KDP-Interior-DRAFT.pdf` is a **paperback interior** file formatted to Amazon KDP's technical spec — reader-facing content only (no illustration prompts, interactive questions, or production notes visible on the page) — now with real illustrations, not placeholder boxes.
+`My-First-Money-Adventure-KDP-Interior-DRAFT.pdf` is a **paperback interior** file formatted to Amazon KDP's technical spec — reader-facing content only (no illustration prompts, interactive questions, or production notes visible on the page) — with real illustrations and a designed, polished layout, not placeholder boxes or plain text-on-white.
 
 ## What's in this version
 
 - **All 24 story pages are illustrated** with original flat-vector scenes (not photos or AI-generated raster images — hand-built SVG, rendered crisp at any size): consistent character designs for Milu, Pico, the coin, and all eight helpers across every scene, warm gradient skies, and scene-appropriate props (wheat field, bus, sewing machine, hospital room, market stall, etc.), matching the palette/character bible from the manuscript's Illustration Consistency Guide.
-- **Visual infographics**: the Helping Chart (Page 28) is a card grid with mini helper avatars + object icons, not a plain text table; the Matching Game (Page 32) carries the same icon set.
+- **Layered, dimensional illustrations**: every character/prop that sits on the ground casts a soft radial-gradient shadow, outfits use a subtle top-light gradient instead of flat color, faces have blush cheeks and eye catchlights, the coin has a proper beveled highlight, and each scene carries a gentle vignette for depth.
+- **A designed page system, not illustration-then-plain-text**: warm cream page background throughout, illustrations sit in a white matted, drop-shadowed frame (like a real picture-book plate), a small coin divider separates image from text, and story text sits in its own soft card set in a serif typeface with a colored lead-in word opening each page.
+- **Visual infographics**: the Helping Chart (Page 28) is a card grid with mini helper avatars + object icons, not a plain text table; the Matching Game (Page 32) carries the same icon set. Page numbers are styled as small badges instead of plain gray text.
 - A real, working single-solution maze (Page 31) and a hand-drawn line-art coloring page (Page 30).
 - 32 single pages, 8.5" × 8.5" trim, no spreads, not encrypted, embedded (subset) fonts, clean minimal metadata, table rulings ≥ 0.75 pt, body text well above the 7-pt floor.
 

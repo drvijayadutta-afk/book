@@ -19,6 +19,40 @@ NIGHT_SKY = ("#2C2A52", "#4B4373")
 DAWN_SKY = ("#FCE0C4", "#BFE3F7")
 GLOW_SKY = ("#FFE9B8", "#FFD98A")
 
+# ---- Coordinated character palette (muted, storybook-harmonious — replaces
+# earlier ad hoc/saturated hexes so every helper reads as one cohesive cast) ----
+PALETTE = {
+    "terracotta": "#C2410C",
+    "sage": "#8CA888",
+    "sage_deep": "#749479",
+    "dusty_blue": "#7BA7C2",
+    "plum": "#A98BC4",
+    "ink_purple": "#6E4F9E",
+    "mustard": "#E3B857",
+    "cream_white": "#FBF7ED",
+    "burnt_orange": "#E0973F",
+    "dusty_rose": "#DE9FAC",
+}
+
+HELPERS = {
+    "farmer_ravi": dict(outfit=PALETTE["sage"], accessory="straw_hat", acc_color=None, skin=K.SKIN2),
+    "farmer_leela": dict(outfit=PALETTE["sage_deep"], accessory="headscarf", acc_color=PALETTE["dusty_rose"], skin=K.SKIN2),
+    "driver": dict(outfit=PALETTE["dusty_blue"], accessory="cap", acc_color="#4C7C9B", skin=K.SKIN2),
+    "teacher": dict(outfit=PALETTE["plum"], accessory="headscarf", acc_color=PALETTE["ink_purple"], skin=K.SKIN2),
+    "tailor": dict(outfit=PALETTE["mustard"], accessory="glasses", acc_color=None, skin=K.SKIN2),
+    "doctor": dict(outfit=PALETTE["cream_white"], accessory=None, acc_color=None, prop="stethoscope", skin=K.SKIN2),
+    "builder": dict(outfit=PALETTE["burnt_orange"], accessory="hardhat", acc_color=None, skin=K.SKIN2),
+    "shopkeeper": dict(outfit=PALETTE["dusty_rose"], accessory="glasses", acc_color=None, skin=K.SKIN2),
+}
+
+def helper(cx, cy, scale, who):
+    spec = HELPERS[who]
+    return K.adult(
+        cx, cy, scale,
+        outfit=spec["outfit"], skin=spec["skin"],
+        accessory=spec.get("accessory"), acc_color=spec.get("acc_color"), prop=spec.get("prop"),
+    )
+
 STORY_TEXT = [
     "Milu loved mornings best. Sunlight danced on her windowsill, and her best friend Pico waited on her bed, wings fluttering, ready for whatever adventure today might bring.",
     "Pico was not quite a bird and not quite a toy — a fluffy little sky-blue friend who giggled, hummed, and always noticed things Milu almost missed.",
@@ -65,7 +99,7 @@ def scene_01(u):
     return sc(u, DAY_SKY, "#FFF8EC", 300, e)
 
 def scene_02(u):
-    e = K.sofa(360, 300, 1.5, "#CDB4DB")
+    e = K.sofa(360, 300, 1.5, PALETTE["plum"])
     e += K.frame_portrait(600, 90, 1.0)
     e += K.coin(300, 305, 1.1, uid=u)
     e += K.milu(230, 300, 0.85)
@@ -90,7 +124,7 @@ def scene_05(u):
     e = K.sun(600, 55, 30)
     e += K.wheat_row(20, 680, 300, 22)
     e += K.bird(150, 60, 1.1) + K.bird(200, 90, 0.9) + K.bird(500, 70, 1.0)
-    e += K.adult(430, 300, 1.05, outfit="#6FA05A", accessory="straw_hat", skin=K.SKIN2)
+    e += helper(430, 300, 1.05, "farmer_ravi")
     e += K.milu(180, 310, 0.8)
     e += K.pico(120, 290, 0.6)
     return sc(u, DAWN_SKY, "#E8C468", 300, e)
@@ -99,14 +133,14 @@ def scene_06(u):
     e = K.bookshelf(560, 300, 0.9)  # reused as shelf of goods
     e += K.market_stall(300, 300, 1.0, color="#FF9E80")
     e += K.bread_loaf(280, 265, 0.9)
-    e += K.adult(230, 300, 0.95, outfit="#EB9FB0", accessory="glasses", skin=K.SKIN2)
+    e += helper(230, 300, 0.95, "shopkeeper")
     e += K.milu(430, 310, 0.8)
     e += K.pico(490, 290, 0.6)
     return sc(u, DAY_SKY, "#FFF3D6", 300, e)
 
 def scene_07(u):
     e = K.cow(320, 300, 1.1)
-    e += K.adult(180, 305, 1.0, outfit="#B7E4C7", accessory="headscarf", acc_color="#8C6BB5", skin=K.SKIN2)
+    e += helper(180, 305, 1.0, "farmer_leela")
     e += K.milu(520, 310, 0.8)
     e += K.pico(570, 290, 0.6)
     e += K.bird(460, 70, 1.0)
@@ -121,7 +155,7 @@ def scene_08(u):
 
 def scene_09(u):
     e = K.bookshelf(580, 260, 1.0)
-    e += K.adult(300, 300, 1.0, outfit="#CDB4DB", accessory="headscarf", acc_color="#5B3E92", skin=K.SKIN2)
+    e += helper(300, 300, 1.0, "teacher")
     e += K.milu(180, 315, 0.72)
     e += K.pico(130, 300, 0.5)
     e += K.milu(400, 320, 0.62)
@@ -130,59 +164,54 @@ def scene_09(u):
 def scene_10(u):
     e = K.fabric_bolts(560, 300, 1.0)
     e += K.sewing_machine(340, 300, 1.1)
-    e += K.adult(200, 300, 1.0, outfit="#F2C94C", accessory="glasses", skin=K.SKIN2)
+    e += helper(200, 300, 1.0, "tailor")
     e += K.milu(460, 320, 0.75)
     e += K.pico(500, 300, 0.55)
     return sc(u, DAY_SKY, "#FFF3D6", 300, e)
 
 def scene_11(u):
     e = K.teddy_bear(500, 300, 1.3)
-    e += K.adult(260, 300, 1.0, outfit="#FFFFFF", prop="stethoscope", skin=K.SKIN2)
+    e += helper(260, 300, 1.0, "doctor")
     e += K.milu(360, 320, 0.72)
     e += K.pico(410, 300, 0.5)
     return sc(u, ("#EAF6EF", "#FFFFFF"), "#DFF2E6", 300, e)
 
 def scene_12(u):
     e = K.brick_wall(250, 300, 300, 130, "#E0836B")
-    e += K.adult(500, 300, 1.05, outfit="#F2A22B", accessory="hardhat", skin=K.SKIN2)
+    e += helper(500, 300, 1.05, "builder")
     e += K.milu(560, 320, 0.7)
     e += K.pico(600, 300, 0.5)
     return sc(u, DAY_SKY, "#FFF8EC", 300, e)
 
 def scene_13(u):
-    e = K.adult(120, 300, 0.95, outfit="#CDB4DB", accessory="headscarf", acc_color="#5B3E92", skin=K.SKIN2)
+    e = helper(120, 300, 0.95, "teacher")
     kids_x = [280, 350, 420, 490]
-    colors = ["#FF9E80", "#8ECDF0", "#B7E4C7", "#F2C94C"]
     for i, kx in enumerate(kids_x):
         e += K.milu(kx, 320, 0.5) if i % 2 == 0 else K.pico(kx, 300, 0.45)
     return sc(u, DAY_SKY, "#FFF3D6", 300, e)
 
 def scene_14(u):
-    e = K.building(320, 300, 260, 140, "#F2C94C", n_windows=3, roof="#5B3E92")
-    e += K.adult(560, 300, 1.0, outfit="#F2A22B", accessory="hardhat", skin=K.SKIN2)
+    e = K.building(320, 300, 260, 140, PALETTE["mustard"], n_windows=3, roof=PALETTE["ink_purple"])
+    e += helper(560, 300, 1.0, "builder")
     e += K.milu(100, 320, 0.75)
     e += K.pico(150, 300, 0.55)
     return sc(u, DAY_SKY, "#B7E4C7", 300, e)
 
 def scene_15(u):
-    e = K.market_stall(240, 300, 1.1, color="#F2C94C")
+    e = K.market_stall(240, 300, 1.1, color=PALETTE["mustard"])
     e += K.fruit_basket(240, 265, 1.1)
-    e += K.adult(430, 305, 0.95, outfit="#6FA05A", accessory="straw_hat", skin=K.SKIN2)
-    e += K.adult(510, 305, 0.95, outfit="#EB9FB0", accessory="glasses", skin=K.SKIN2)
+    e += helper(430, 305, 0.95, "farmer_ravi")
+    e += helper(510, 305, 0.95, "shopkeeper")
     e += K.milu(600, 320, 0.72)
     e += K.pico(340, 300, 0.5)
     return sc(u, DAY_SKY, "#FFF3D6", 300, e)
 
 def scene_16(u):
     e = K.coin(350, 90, 1.7, uid=u)
-    helpers = [
-        ("#6FA05A", "straw_hat"), ("#B7E4C7", "headscarf"), ("#5FA8D3", "cap"),
-        ("#CDB4DB", "headscarf"), ("#F2C94C", "glasses"), ("#FFFFFF", None),
-        ("#F2A22B", "hardhat"), ("#EB9FB0", "glasses"),
-    ]
+    order = ["farmer_ravi", "farmer_leela", "driver", "teacher", "tailor", "doctor", "builder", "shopkeeper"]
     xs = [40, 100, 160, 220, 480, 540, 600, 660]
-    for (outfit, acc), hx in zip(helpers, xs):
-        e += K.adult(hx, 322, 0.4, outfit=outfit, accessory=acc, skin=K.SKIN2)
+    for who, hx in zip(order, xs):
+        e += helper(hx, 322, 0.4, who)
     e += K.milu(310, 325, 0.85)
     e += K.pico(400, 312, 0.55)
     return sc(u, GLOW_SKY, "#FFE9B8", 300, e)
@@ -218,10 +247,10 @@ def scene_19(u):
     return sc(u, DAY_SKY, "#B7E4C7", 320, e)
 
 def scene_20(u):
-    e = K.sofa(560, 300, 1.1, "#CDB4DB")
+    e = K.sofa(560, 300, 1.1, PALETTE["plum"])
     e += K.frame_portrait(80, 90, 1.0)
-    e += K.adult(230, 305, 1.0, outfit="#F2C94C", skin=K.SKIN2)
-    e += K.adult(420, 305, 1.0, outfit="#5FA8D3", skin=K.SKIN2)
+    e += K.adult(230, 305, 1.0, outfit=PALETTE["dusty_rose"], skin=K.SKIN2)
+    e += K.adult(420, 305, 1.0, outfit=PALETTE["dusty_blue"], skin=K.SKIN2)
     e += K.milu(325, 322, 0.75)
     e += K.pico(370, 300, 0.5)
     return sc(u, DAY_SKY, "#FFF8EC", 300, e)
@@ -405,19 +434,19 @@ for i, text in enumerate(STORY_TEXT):
 
 # 28: HELPING CHART — visual infographic
 HELPER_ICON_SPEC = [
-    ("bread", "Farmer &amp; Shopkeeper", "#6FA05A", "straw_hat"),
-    ("milk", "Farmer", "#B7E4C7", "headscarf"),
-    ("bus", "Driver", "#5FA8D3", "cap"),
-    ("book", "Teacher", "#CDB4DB", "headscarf"),
-    ("shirt", "Tailor", "#F2C94C", "glasses"),
-    ("hospital", "Doctor &amp; Builder", "#FFFFFF", None),
-    ("school", "Teacher &amp; Builder", "#F2A22B", "hardhat"),
-    ("fruit", "Farmer &amp; Shopkeeper", "#EB9FB0", "glasses"),
+    ("bread", "Farmer &amp; Shopkeeper", "farmer_ravi"),
+    ("milk", "Farmer", "farmer_leela"),
+    ("bus", "Driver", "driver"),
+    ("book", "Teacher", "teacher"),
+    ("shirt", "Tailor", "tailor"),
+    ("hospital", "Doctor &amp; Builder", "doctor"),
+    ("school", "Teacher &amp; Builder", "teacher"),
+    ("fruit", "Farmer &amp; Shopkeeper", "shopkeeper"),
 ]
 cards = []
-for kind, who, outfit, acc in HELPER_ICON_SPEC:
+for kind, who, who_key in HELPER_ICON_SPEC:
     mini = K.scene_svg(f"chart{kind}", K.mini_icon(kind, 30, 30, 1.0), 60, 60)
-    avatar = K.scene_svg(f"av{kind}", K.adult(30, 62, 0.42, outfit=outfit, accessory=acc, skin=K.SKIN2), 60, 68)
+    avatar = K.scene_svg(f"av{kind}", helper(30, 62, 0.42, who_key), 60, 68)
     cards.append(f"""
     <div class="chart-card">
       <div class="chart-icons"><span class="mini">{mini}</span><span class="plus">+</span><span class="mini">{avatar}</span></div>
@@ -454,16 +483,16 @@ section("activity", "PAGE 31", "Help Milu Reach the Bakery!", f"""
 
 # 32: MATCHING GAME — with icons
 MATCH_SPEC = [
-    ("Farmer", "#6FA05A", "straw_hat", "bread", "Bread / Fruit"),
-    ("Driver", "#5FA8D3", "cap", "bus", "Bus Ride"),
-    ("Teacher", "#CDB4DB", "headscarf", "book", "Book"),
-    ("Tailor", "#F2C94C", "glasses", "shirt", "Shirt"),
-    ("Doctor", "#FFFFFF", None, "hospital", "Hospital Care"),
-    ("Builder", "#F2A22B", "hardhat", "school", "School / Hospital"),
+    ("Farmer", "farmer_ravi", "bread", "Bread / Fruit"),
+    ("Driver", "driver", "bus", "Bus Ride"),
+    ("Teacher", "teacher", "book", "Book"),
+    ("Tailor", "tailor", "shirt", "Shirt"),
+    ("Doctor", "doctor", "hospital", "Hospital Care"),
+    ("Builder", "builder", "school", "School / Hospital"),
 ]
 rows = []
-for name, outfit, acc, kind, made in MATCH_SPEC:
-    av = K.scene_svg(f"m{name}", K.adult(30, 62, 0.42, outfit=outfit, accessory=acc, skin=K.SKIN2), 60, 68)
+for name, who_key, kind, made in MATCH_SPEC:
+    av = K.scene_svg(f"m{name}", helper(30, 62, 0.42, who_key), 60, 68)
     ic = K.scene_svg(f"i{name}", K.mini_icon(kind, 30, 30, 1.0), 60, 60)
     rows.append(f'<tr><td><span class="row-icon">{av}</span> {name}</td><td class="dots">&#8226;&nbsp;&nbsp;&nbsp;&nbsp;&#8226;</td><td>{made} <span class="row-icon">{ic}</span></td></tr>')
 section("activity", "PAGE 32", "Match the Helper to What They Made", f"""
@@ -497,6 +526,11 @@ h1 {
   font-size: 16pt; color: #A8481A; margin: 0 0 0.2in 0;
   padding-bottom: 0.09in; border-bottom: 2pt solid #EAD9B4;
 }
+/* back-matter/activity pages get a teal identity, distinct from the
+   story's terracotta, so the reader feels the section change */
+.activity h1 { color: #2E7D68; border-bottom-color: #BEDDD3; }
+.activity .kicker { color: #2E7D68; border-color: #BEDDD3; }
+.activity .divider-line, .story .divider-line { background: #DEC9A0; }
 
 .title-wrap { text-align: center; }
 .hero-frame {
@@ -576,7 +610,7 @@ td { padding: 0.09in 0.1in; border: 1pt solid #eee1c9; vertical-align: middle; b
 .chart-icons .mini svg { width: 34px; height: 34px; display: block; }
 .chart-icons .plus { color: #cbb89a; font-size: 10pt; }
 .chart-label { flex: 1; font-size: 9.5pt; color: #4a3d33; }
-.chart-box { font-size: 14pt; color: #A8481A; }
+.chart-box { font-size: 14pt; color: #2E7D68; }
 """
 
 html_doc = f"""<!doctype html>

@@ -4,21 +4,33 @@
 SKIN = "#E8B888"
 SKIN2 = "#C68C53"
 INK = "#3a2f2a"
-BLUSH = "#F4A28C"
+BLUSH = "#F79A85"
+
+# Color-psychology leads for the two hero characters (ages 3-5 respond more
+# to bright, saturated hues than muted/pastel ones): Milu is warm coral-red —
+# energy, warmth, "look at me" — since she's the one the child follows.
+# Pico is bright sky blue — calm, trustworthy, a safe companion color that
+# doesn't compete with Milu for attention.
+MILU_CORAL = "#FF6F5E"
+PICO_BLUE = "#4FC3E8"
 
 _UID_COUNTER = [0]
 def _uid():
     _UID_COUNTER[0] += 1
     return f"u{_UID_COUNTER[0]}"
 
-def sky_ground(uid, sky_top, sky_bottom, ground_color, ground_y=250, w=700, h=355):
+def sky_ground(uid, sky_top, sky_bottom, ground_color, ground_y=250, w=700, h=355, sky_mid=None):
     gid = f"sky_{uid}"
     ggid = f"grnd_{uid}"
     vgid = f"vig_{uid}"
+    gr2id = f"grnd2_{uid}"
+    ground_glow = _shade(ground_color, 0.22)
+    mid_stop = f'<stop offset="0.55" stop-color="{sky_mid}"/>' if sky_mid else ""
     return f"""
     <defs>
       <linearGradient id="{gid}" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stop-color="{sky_top}"/>
+        {mid_stop}
         <stop offset="1" stop-color="{sky_bottom}"/>
       </linearGradient>
       <linearGradient id="{ggid}" x1="0" y1="0" x2="0" y2="1">
@@ -26,13 +38,17 @@ def sky_ground(uid, sky_top, sky_bottom, ground_color, ground_y=250, w=700, h=35
         <stop offset="0.18" stop-color="#FFFFFF" stop-opacity="0"/>
         <stop offset="1" stop-color="#000000" stop-opacity="0.05"/>
       </linearGradient>
+      <linearGradient id="{gr2id}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="{ground_glow}"/>
+        <stop offset="1" stop-color="{ground_color}"/>
+      </linearGradient>
       <radialGradient id="{vgid}" cx="0.5" cy="0.42" r="0.75">
         <stop offset="0.6" stop-color="#000000" stop-opacity="0"/>
         <stop offset="1" stop-color="#3a2f2a" stop-opacity="0.10"/>
       </radialGradient>
     </defs>
     <rect x="0" y="0" width="{w}" height="{h}" fill="url(#{gid})"/>
-    <rect x="0" y="{ground_y}" width="{w}" height="{h-ground_y}" fill="{ground_color}"/>
+    <rect x="0" y="{ground_y}" width="{w}" height="{h-ground_y}" fill="url(#{gr2id})"/>
     <rect x="0" y="{ground_y}" width="{w}" height="{h-ground_y}" fill="url(#{ggid})"/>
     """
 
@@ -143,7 +159,7 @@ def milu(cx, cy, scale=1.0, hold_coin=False):
     def y(v): return cy + v * s
     def x(v): return cx + v * s
     coin_bit = coin(x(44), y(-150), 0.5, uid=f"m{int(cx)}{int(cy)}", glow=False) if hold_coin else ""
-    tunic_defs, tunic_fill = outfit_fill("#FF9E80")
+    tunic_defs, tunic_fill = outfit_fill(MILU_CORAL)
     head_defs, head_fill = outfit_fill(SKIN)
     shadow = soft_shadow(x(0), y(20), 30 * s, 9 * s, 0.24)
     return f"""<g>
@@ -172,15 +188,16 @@ def pico(cx, cy, scale=1.0):
     s = scale
     def y(v): return cy + v * s
     def x(v): return cx + v * s
-    body_defs, body_fill = outfit_fill("#8ECDF0")
+    body_defs, body_fill = outfit_fill(PICO_BLUE)
+    wing_color = _shade(PICO_BLUE, -0.18)
     shadow = soft_shadow(x(0), y(30), 26 * s, 8 * s, 0.22)
     return f"""<g>
       {body_defs}
       {shadow}
       <ellipse cx="{x(-14)}" cy="{y(22)}" rx="{5*s}" ry="{7*s}" fill="#F2C94C"/>
       <ellipse cx="{x(14)}" cy="{y(22)}" rx="{5*s}" ry="{7*s}" fill="#F2C94C"/>
-      <path d="M {x(-30)} {y(-14)} q {-14*s} {-4*s} -{20*s} {6*s} q {12*s} {6*s} {20*s} -{2*s}" fill="#5FB0DE"/>
-      <path d="M {x(30)} {y(-14)} q {14*s} {-4*s} {20*s} {6*s} q {-12*s} {6*s} -{20*s} -{2*s}" fill="#5FB0DE"/>
+      <path d="M {x(-30)} {y(-14)} q {-14*s} {-4*s} -{20*s} {6*s} q {12*s} {6*s} {20*s} -{2*s}" fill="{wing_color}"/>
+      <path d="M {x(30)} {y(-14)} q {14*s} {-4*s} {20*s} {6*s} q {-12*s} {6*s} -{20*s} -{2*s}" fill="{wing_color}"/>
       <ellipse cx="{x(0)}" cy="{y(-10)}" rx="{30*s}" ry="{26*s}" fill="{body_fill}"/>
       <ellipse cx="{x(-11)}" cy="{y(-22)}" rx="{10*s}" ry="{5*s}" fill="#FFFFFF" opacity="0.2"/>
       <ellipse cx="{x(-15)}" cy="{y(-2)}" rx="{6*s}" ry="{4*s}" fill="{BLUSH}" opacity="0.5"/>
@@ -190,7 +207,7 @@ def pico(cx, cy, scale=1.0):
       <circle cx="{x(-12)}" cy="{y(-17.2)}" r="{1*s}" fill="#FFFFFF" opacity="0.85"/>
       <circle cx="{x(9.8)}" cy="{y(-17.2)}" r="{1*s}" fill="#FFFFFF" opacity="0.85"/>
       <path d="M {x(-6)} {y(-4)} q {6*s} {5*s} {12*s} 0" stroke="{INK}" stroke-width="{1.6*s}" fill="none" stroke-linecap="round"/>
-      <path d="M {x(-18)} {y(10)} q {18*s} {14*s} {36*s} 0" fill="#FF9E80"/>
+      <path d="M {x(-18)} {y(10)} q {18*s} {14*s} {36*s} 0" fill="{MILU_CORAL}"/>
     </g>"""
 
 # accessory drawers keyed by name; each returns svg using head center (hx,hy) and scale s

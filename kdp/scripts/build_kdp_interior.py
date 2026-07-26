@@ -13,31 +13,38 @@ AUTHOR = "Dr. Vijaya Dutta"
 TITLE = "My First Money Adventure"
 SERIES = "Little Money Explorers — Book 1"
 
-DAY_SKY = ("#BFE3F7", "#FFF3D6")
-DUSK_SKY = ("#F6C9A8", "#E9B7D0")
-NIGHT_SKY = ("#2C2A52", "#4B4373")
-DAWN_SKY = ("#FCE0C4", "#BFE3F7")
-GLOW_SKY = ("#FFE9B8", "#FFD98A")
+# Sky triads (top, mid, bottom) — three stops instead of two for a richer,
+# more dimensional gradient than a flat two-color fade.
+DAY_SKY = ("#7EC8F2", "#AFE0F5", "#FFF0C2")
+DUSK_SKY = ("#F2965E", "#F6B98E", "#F4C9DE")
+NIGHT_SKY = ("#181A3D", "#2C2A6B", "#4B4373")
+DAWN_SKY = ("#F9A66C", "#F9C88E", "#AEE0F2")
+GLOW_SKY = ("#FFCB4D", "#FFDF8A", "#FFEFC2")
 
 # ---- Coordinated character palette (muted, storybook-harmonious — replaces
 # earlier ad hoc/saturated hexes so every helper reads as one cohesive cast) ----
+# Color-psychology palette for ages 3-5: preschoolers engage more with
+# bright, saturated hues than the muted/dusty tones adults tend to prefer
+# (Boyatzis & Varghese, 1994; Zentner, 2001 — young children reliably choose
+# high-saturation primary/secondary colors). Each hue below is picked for
+# what it should make a small child feel about that character:
 PALETTE = {
-    "terracotta": "#C2410C",
-    "sage": "#8CA888",
-    "sage_deep": "#749479",
-    "dusty_blue": "#7BA7C2",
-    "plum": "#A98BC4",
-    "ink_purple": "#6E4F9E",
-    "mustard": "#E3B857",
-    "cream_white": "#FBF7ED",
-    "burnt_orange": "#E0973F",
-    "dusty_rose": "#DE9FAC",
+    "terracotta": "#D94E1F",   # warmth + energy — the storyteller's accent color
+    "sage": "#5FAE62",         # green = growth, nature, "safe to trust" (Farmer Ravi)
+    "sage_deep": "#3F9E6B",    # deeper green = nurture/care (Farmer Leela + animals)
+    "dusty_blue": "#3AA6D6",   # blue = calm + dependability (Driver Joseph)
+    "plum": "#9B5FC0",         # purple = imagination + wonder (Teacher Fatima)
+    "ink_purple": "#6E3FA3",   # deeper violet accent, paired with plum
+    "mustard": "#F2B134",      # yellow/gold = cheerfulness, optimism (Tailor Suresh)
+    "cream_white": "#FBF7ED",  # white = cleanliness, gentleness (Doctor Ananya)
+    "burnt_orange": "#F2843A", # orange = enthusiasm, hands-on energy (Builder Karim)
+    "dusty_rose": "#F0688A",   # pink/red-pink = friendliness, warmth (Shopkeeper Meena)
 }
 
 HELPERS = {
     "farmer_ravi": dict(outfit=PALETTE["sage"], accessory="straw_hat", acc_color=None, skin=K.SKIN2),
     "farmer_leela": dict(outfit=PALETTE["sage_deep"], accessory="headscarf", acc_color=PALETTE["dusty_rose"], skin=K.SKIN2),
-    "driver": dict(outfit=PALETTE["dusty_blue"], accessory="cap", acc_color="#4C7C9B", skin=K.SKIN2),
+    "driver": dict(outfit=PALETTE["dusty_blue"], accessory="cap", acc_color="#1F7FAD", skin=K.SKIN2),
     "teacher": dict(outfit=PALETTE["plum"], accessory="headscarf", acc_color=PALETTE["ink_purple"], skin=K.SKIN2),
     "tailor": dict(outfit=PALETTE["mustard"], accessory="glasses", acc_color=None, skin=K.SKIN2),
     "doctor": dict(outfit=PALETTE["cream_white"], accessory=None, acc_color=None, prop="stethoscope", skin=K.SKIN2),
@@ -81,7 +88,8 @@ STORY_TEXT = [
 ]
 
 def sc(uid, sky, ground, ground_y, extra):
-    bg = K.sky_ground(uid, sky[0], sky[1], ground, ground_y)
+    top, mid, bottom = sky
+    bg = K.sky_ground(uid, top, bottom, ground, ground_y, sky_mid=mid)
     return bg + extra + K.vignette(700, 355, uid)
 
 def scene_00(u):
@@ -174,7 +182,7 @@ def scene_11(u):
     e += helper(260, 300, 1.0, "doctor")
     e += K.milu(360, 320, 0.72)
     e += K.pico(410, 300, 0.5)
-    return sc(u, ("#EAF6EF", "#FFFFFF"), "#DFF2E6", 300, e)
+    return sc(u, ("#BEE8D3", "#EAF6EF", "#FFFFFF"), "#DFF2E6", 300, e)
 
 def scene_12(u):
     e = K.brick_wall(250, 300, 300, 130, "#E0836B")
@@ -287,7 +295,7 @@ SCENE_FUNCS = [scene_00, scene_01, scene_02, scene_03, scene_04, scene_05, scene
 def illo_scene(idx):
     uid = f"s{idx}"
     inner = SCENE_FUNCS[idx](uid)
-    return f'<div class="illo-frame">{K.scene_svg(uid, inner)}</div>'
+    return f'<div class="illo-frame-outer"><div class="illo-frame">{K.scene_svg(uid, inner)}</div></div>'
 
 # --------------------------------------------------------------- MAZE (SVG)
 GRID = 5
@@ -371,13 +379,13 @@ sections = []
 def section(cls, kicker, title, inner):
     sections.append(f"""
     <section class="section {cls}">
-      <div class="kicker">{kicker}</div>
+      {f'<div class="kicker">{kicker}</div>' if kicker else ''}
       {f'<h1>{title}</h1>' if title else ''}
       {inner}
     </section>""")
 
 # 1. TITLE PAGE — illustrated hero
-hero = K.sky_ground("hero", "#FFE9B8", "#FFF3D6", "#FFD98A", 300, 700, 420)
+hero = K.sky_ground("hero", "#FFCB4D", "#FFE9B8", "#FFD98A", 300, 700, 420, sky_mid="#FFDD8C")
 hero += K.sun(620, 70, 36)
 hero += K.coin(350, 100, 2.1, uid="hero")
 hero += K.milu(250, 350, 1.15)
@@ -411,7 +419,7 @@ section("copyright", "", "", f"""
 """)
 
 # 3. DEDICATION
-ded_art = K.sky_ground("ded", "#FFE9B8", "#FFF3D6", "#FFD98A", 130, 700, 170)
+ded_art = K.sky_ground("ded", "#FFCB4D", "#FFF3D6", "#FFD98A", 130, 700, 170, sky_mid="#FFE0A0")
 ded_art += K.coin(350, 85, 1.4, uid="ded")
 section("dedication", "", "", f"""
   <div class="dedication-wrap">
@@ -426,9 +434,14 @@ divider_svg = K.scene_svg("div", K.coin(30, 30, 0.55, uid="div", glow=False), 60
 for i, text in enumerate(STORY_TEXT):
     lead, _, rest = text.partition(" ")
     styled_text = f'<span class="lead-word">{lead}</span> {rest}'
-    section("story", f"PAGE {i+3}", "", f"""
+    section("story", "", "", f"""
       {illo_scene(i)}
-      <div class="divider"><span class="divider-line"></span><span class="divider-coin">{divider_svg}</span><span class="divider-line"></span></div>
+      <div class="divider">
+        <span class="divider-line"></span>
+        <span class="divider-coin">{divider_svg}</span>
+        <span class="divider-line"></span>
+        <span class="page-tag">PAGE {i+4}</span>
+      </div>
       <div class="text-card"><p class="story-text">{styled_text}</p></div>
     """)
 
@@ -504,14 +517,17 @@ section("activity", "PAGE 32", "Match the Helper to What They Made", f"""
 """)
 
 css = """
-@page { size: 8.5in 8.5in; margin: 0; }
+/* @page margin (not body padding) is what's used for the page-content
+   inset: body is one long fragmented box across all 32 pages, and per the
+   CSS Fragmentation spec, a fragmented box's padding only paints on its
+   FIRST and LAST fragments -- so body padding here would silently vanish
+   on pages 2-31, breaking every "bleed to page edge" negative margin on
+   every page but the first. @page margin/background apply per-page. */
+@page { size: 8.5in 8.5in; margin: 0.55in 0.6in 0.6in 0.6in; background: #FBF3E3; }
 * { box-sizing: border-box; }
-html { background: #FBF3E3; }
 body {
   font-family: 'Liberation Sans', 'DejaVu Sans', sans-serif;
   color: #2a2320; font-size: 12pt; line-height: 1.5;
-  background: #FBF3E3;
-  padding: 0.55in 0.6in 0.6in 0.6in;
 }
 .section { page-break-before: always; position: relative; }
 .section.first-section { page-break-before: avoid; }
@@ -563,27 +579,43 @@ h1 {
 }
 .todo { color: #b23b3b; font-style: italic; }
 
-.illo-frame {
-  border-radius: 20px; overflow: hidden;
-  box-shadow: 0 0 0 6pt #FFFDF8, 0 0 0 7pt #EAD9B4, 0 8pt 18pt rgba(58,47,42,0.20);
-  margin: 0.06in 0.06in 0.26in 0.06in;
+/* Story illustrations bleed to the full page width (not just the text
+   margins) so the picture dominates the page — young children engage with
+   the art, not the surrounding whitespace. A rainbow gradient "frame" ring
+   (instead of a flat gold line) makes it feel like a bright picture-book
+   plate rather than a document figure. */
+.illo-frame-outer {
+  margin: -0.55in -0.6in 0.22in -0.6in;
+  padding: 7pt;
+  border-radius: 0 0 20px 20px;
+  background: linear-gradient(135deg, #FFCB4D 0%, #F0688A 35%, #9B5FC0 68%, #3AA6D6 100%);
+  box-shadow: 0 10pt 22pt rgba(58,47,42,0.24);
+  overflow: hidden;
 }
+.illo-frame { border-radius: 0 0 14px 14px; overflow: hidden; box-shadow: 0 0 0 4pt #FFFDF8 inset; }
 .illo-frame svg { display: block; width: 100%; height: auto; }
 
-.divider { display: flex; align-items: center; justify-content: center; margin: -0.1in 0 0.1in 0; }
-.divider-line { flex: 1; max-width: 1.1in; height: 1pt; background: #DEC9A0; }
-.divider-coin { width: 30px; height: 30px; margin: 0 0.12in; flex-shrink: 0; }
+.divider { display: flex; align-items: center; justify-content: center; margin: 0 0 0.14in 0; position: relative; }
+.divider-line { flex: 1; max-width: 0.9in; height: 1pt; background: #DEC9A0; }
+.divider-coin { width: 38px; height: 38px; margin: 0 0.14in; flex-shrink: 0; }
 .divider-coin svg { display: block; width: 100%; height: 100%; }
+.page-tag {
+  position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+  font-size: 7.5pt; letter-spacing: 1.2px; color: #B8894A;
+  background: #FFFDF8; border: 1pt solid #E8D8B8; border-radius: 10pt;
+  padding: 2pt 9pt;
+}
 
 .text-card {
-  background: #FFFDF8; border-radius: 14px; padding: 0.14in 0.28in;
-  box-shadow: 0 2pt 8pt rgba(58,47,42,0.07);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFFCF3 100%);
+  border-radius: 16px; padding: 0.18in 0.32in;
+  box-shadow: 0 3pt 10pt rgba(58,47,42,0.08);
 }
 .story-text {
   font-family: 'DejaVu Serif', serif;
-  font-size: 14pt; line-height: 1.55; color: #3a2f2a; margin: 0;
+  font-size: 16.5pt; line-height: 1.5; color: #3a2f2a; margin: 0;
 }
-.story-text .lead-word { color: #A8481A; font-weight: bold; }
+.story-text .lead-word { color: #D94E1F; font-weight: bold; }
 
 .activity-intro { font-size: 11pt; color: #4a3d33; margin-bottom: 0.15in; }
 .small-art { border-radius: 14px; overflow: hidden; margin-bottom: 0.15in; box-shadow: 0 3pt 10pt rgba(58,47,42,0.12); }
